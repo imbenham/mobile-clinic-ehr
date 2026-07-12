@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { MedicationList } from "@/components/patients/MedicationList";
 import { FhirError } from "@/lib/fhir/client";
+import type { MedicationHistoryEntry } from "@/lib/fhir/medication-types";
+import { listMedications } from "@/lib/fhir/medications";
 import { getPatientView } from "@/lib/fhir/patients";
 import { ageFromBirthDate, formatDate, titleCase } from "@/lib/utils/format";
 
@@ -20,6 +23,14 @@ export default async function PatientDetailPage({
   } catch (err) {
     if (err instanceof FhirError && err.status === 404) notFound();
     throw err;
+  }
+
+  let medications: MedicationHistoryEntry[] = [];
+  let medsError: string | null = null;
+  try {
+    medications = await listMedications(id);
+  } catch (err) {
+    medsError = err instanceof FhirError ? err.message : "Could not load medications.";
   }
 
   const age = ageFromBirthDate(patient.birthDate);
@@ -56,9 +67,17 @@ export default async function PatientDetailPage({
 
       <DemographicsGrid patient={patient} />
 
-      {/* Week 2 will add vital signs, conditions, and medications here. */}
-      <div className="rounded-lg border border-dashed border-border bg-surface px-6 py-10 text-center text-sm text-muted">
-        Full medical history — vital signs, conditions, and medications — coming in Week 2.
+      {medsError ? (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {medsError}
+        </div>
+      ) : (
+        <MedicationList entries={medications} />
+      )}
+
+      {/* Still to come in Week 2. */}
+      <div className="rounded-lg border border-dashed border-border bg-surface px-6 py-8 text-center text-sm text-muted">
+        Vital signs and active conditions coming next.
       </div>
     </div>
   );

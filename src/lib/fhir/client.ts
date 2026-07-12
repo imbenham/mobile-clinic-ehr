@@ -1,4 +1,5 @@
 import "server-only";
+import type { Bundle, FhirResource, OperationOutcome } from "./resources";
 
 /**
  * Minimal FHIR REST client.
@@ -19,9 +20,9 @@ const FHIR_JSON = "application/fhir+json";
 
 export class FhirError extends Error {
   status: number;
-  outcome?: fhir4.OperationOutcome;
+  outcome?: OperationOutcome;
 
-  constructor(message: string, status: number, outcome?: fhir4.OperationOutcome) {
+  constructor(message: string, status: number, outcome?: OperationOutcome) {
     super(message);
     this.name = "FhirError";
     this.status = status;
@@ -39,7 +40,7 @@ function buildHeaders(extra?: HeadersInit): Headers {
 }
 
 /** Turn a FHIR OperationOutcome into a readable message. */
-function outcomeMessage(outcome: fhir4.OperationOutcome | undefined, fallback: string): string {
+function outcomeMessage(outcome: OperationOutcome | undefined, fallback: string): string {
   const issue = outcome?.issue?.[0];
   return issue?.diagnostics ?? issue?.details?.text ?? fallback;
 }
@@ -93,7 +94,7 @@ async function request<T>({
   const data = text ? (JSON.parse(text) as unknown) : undefined;
 
   if (!res.ok) {
-    const outcome = data as fhir4.OperationOutcome | undefined;
+    const outcome = data as OperationOutcome | undefined;
     throw new FhirError(
       outcomeMessage(outcome, `FHIR request failed: ${res.status} ${res.statusText}`),
       res.status,
@@ -106,7 +107,7 @@ async function request<T>({
 
 export const fhirClient = {
   /** Read a single resource by type and id. */
-  read<T extends fhir4.FhirResource>(
+  read<T extends FhirResource>(
     resourceType: string,
     id: string,
     opts?: Pick<RequestOptions, "next" | "cache">,
@@ -115,21 +116,21 @@ export const fhirClient = {
   },
 
   /** Search a resource type, returning a Bundle. */
-  search<T extends fhir4.FhirResource>(
+  async search<T extends FhirResource>(
     resourceType: string,
     searchParams?: RequestOptions["searchParams"],
     opts?: Pick<RequestOptions, "next" | "cache">,
-  ): Promise<fhir4.Bundle<T>> {
-    return request<fhir4.Bundle<T>>({ path: resourceType, searchParams, ...opts });
+  ): Promise<T[]> {
+    return bundleResources(await request<Bundle<T>>({ path: resourceType, searchParams, ...opts }));
   },
 
   /** Create a new resource (POST). Returns the created resource with server id. */
-  create<T extends fhir4.FhirResource>(resourceType: string, resource: T): Promise<T> {
+  create<T extends FhirResource>(resourceType: string, resource: T): Promise<T> {
     return request<T>({ path: resourceType, method: "POST", body: resource });
   },
 
   /** Update an existing resource (PUT). Requires `resource.id`. */
-  update<T extends fhir4.FhirResource & { id?: string }>(
+  update<T extends FhirResource & { id?: string }>(
     resourceType: string,
     resource: T,
   ): Promise<T> {
@@ -141,7 +142,7 @@ export const fhirClient = {
 };
 
 /** Flatten a Bundle's entries into a plain array of resources. */
-export function bundleResources<T extends fhir4.FhirResource>(bundle: fhir4.Bundle<T>): T[] {
+export function bundleResources<T extends FhirResource>(bundle: Bundle<T>): T[] {
   return (bundle.entry ?? [])
     .map((entry) => entry.resource)
     .filter((r): r is T => r !== undefined);

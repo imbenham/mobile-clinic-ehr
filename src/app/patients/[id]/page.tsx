@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ConditionList } from "@/components/patients/ConditionList";
 import { MedicationAllergies } from "@/components/patients/MedicationAllergies";
 import { MedicationList } from "@/components/patients/MedicationList";
+import { VitalsSection } from "@/components/patients/VitalsHistoryComponent";
 import { FhirError } from "@/lib/fhir/client";
+import type { ConditionView } from "@/lib/fhir/condition-types";
+import { getConditions } from "@/lib/fhir/conditions";
 import type { MedicationHistoryEntry } from "@/lib/fhir/medication-types";
 import { listMedications } from "@/lib/fhir/medications";
 import { getPatientView } from "@/lib/fhir/patients";
 import { ageFromBirthDate, formatDate, titleCase } from "@/lib/utils/format";
-import { VitalsSection } from "@/components/patients/VitalsHistoryComponent";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +38,15 @@ export default async function PatientDetailPage({
     medsError = err instanceof FhirError ? err.message : "Could not load medications.";
   }
 
- const age = ageFromBirthDate(patient.birthDate);
+  let conditions: ConditionView[] = [];
+  let conditionsError: string | null = null;
+  try {
+    conditions = await getConditions(id);
+  } catch (err) {
+    conditionsError = err instanceof FhirError ? err.message : "Could not load conditions.";
+  }
+
+  const age = ageFromBirthDate(patient.birthDate);
 
   return (
     <div className="flex flex-col gap-6">
@@ -82,10 +93,13 @@ export default async function PatientDetailPage({
 
       <VitalsSection patientId={id} />
 
-      {/* Still to come in Week 2. */}
-      <div className="rounded-lg border border-dashed border-border bg-surface px-6 py-8 text-center text-sm text-muted">
-        Active conditions coming next.
-      </div>
+      {conditionsError ? (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {conditionsError}
+        </div>
+      ) : (
+        <ConditionList conditions={conditions} />
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { MedicationAllergies } from "@/components/patients/MedicationAllergies";
 import { MedicationList } from "@/components/patients/MedicationList";
 import { FhirError } from "@/lib/fhir/client";
 import type { MedicationHistoryEntry } from "@/lib/fhir/medication-types";
@@ -68,13 +69,16 @@ export default async function PatientDetailPage({
 
       <DemographicsGrid patient={patient} />
 
-      {medsError ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {medsError}
-        </div>
-      ) : (
-        <MedicationList entries={medications} />
-      )}
+      <div className="flex flex-col gap-3">
+        <MedicationAllergies patientId={id} />
+        {medsError ? (
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {medsError}
+          </div>
+        ) : (
+          <MedicationList entries={medications} />
+        )}
+      </div>
 
       <VitalsSection patientId={id} />
 

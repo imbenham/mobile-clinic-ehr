@@ -49,8 +49,12 @@ interface RequestOptions {
   /** URL path relative to the FHIR base, e.g. `Patient` or `Patient/123`. */
   path: string;
   method?: "GET" | "POST" | "PUT" | "DELETE";
-  /** Query parameters — appended to the path for GET/search requests. */
-  searchParams?: Record<string, string | number | undefined>;
+  /**
+   * Query parameters — appended to the path for GET/search requests. An array
+   * value is emitted as a repeated parameter, e.g. `{ "status:not": ["a", "b"] }`
+   * → `status:not=a&status:not=b`.
+   */
+  searchParams?: Record<string, string | number | Array<string | number> | undefined>;
   /** FHIR resource body for POST/PUT. */
   body?: unknown;
   /** Next.js fetch cache/revalidation options. */
@@ -69,7 +73,10 @@ async function request<T>({
   const url = new URL(`${FHIR_BASE_URL}/${path.replace(/^\//, "")}`);
   if (searchParams) {
     for (const [key, value] of Object.entries(searchParams)) {
-      if (value !== undefined && value !== "") {
+      if (value === undefined || value === "") continue;
+      if (Array.isArray(value)) {
+        for (const v of value) url.searchParams.append(key, String(v));
+      } else {
         url.searchParams.set(key, String(value));
       }
     }

@@ -7,6 +7,7 @@ import type { MedicationHistoryEntry } from "@/lib/fhir/medication-types";
 import { listMedications } from "@/lib/fhir/medications";
 import { getPatientView } from "@/lib/fhir/patients";
 import { ageFromBirthDate, formatDate, titleCase } from "@/lib/utils/format";
+import { VitalsSection } from "@/components/patients/VitalsHistoryComponent";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,7 @@ export default async function PatientDetailPage({
     medsError = err instanceof FhirError ? err.message : "Could not load medications.";
   }
 
-  const age = ageFromBirthDate(patient.birthDate);
+ const age = ageFromBirthDate(patient.birthDate);
 
   return (
     <div className="flex flex-col gap-6">
@@ -75,9 +76,11 @@ export default async function PatientDetailPage({
         <MedicationList entries={medications} />
       )}
 
+      <VitalsSection patientId={id} />
+
       {/* Still to come in Week 2. */}
       <div className="rounded-lg border border-dashed border-border bg-surface px-6 py-8 text-center text-sm text-muted">
-        Vital signs and active conditions coming next.
+        Active conditions coming next.
       </div>
     </div>
   );

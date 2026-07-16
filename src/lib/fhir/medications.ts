@@ -60,6 +60,7 @@ const getMedicationInfo = (medicationRequest: MedicationRequest, medicationMap: 
       dateEnded: medicationRequest.dispenseRequest?.validityPeriod?.end,
       prescriberName: medicationRequest.requester?.display,
       detectedIssue: getDetectedIssue(medicationRequest),
+      reasonConditionIds: getReasonConditionIds(medicationRequest),
     };
   }
   if (medConcept) {
@@ -71,6 +72,7 @@ const getMedicationInfo = (medicationRequest: MedicationRequest, medicationMap: 
       dateEnded: medicationRequest.dispenseRequest?.validityPeriod?.end,
       prescriberName: medicationRequest.requester?.display,
       detectedIssue: getDetectedIssue(medicationRequest),
+      reasonConditionIds: getReasonConditionIds(medicationRequest),
     };
   }
 
@@ -131,6 +133,13 @@ const getMedicationDescription = (medication: Medication, request: MedicationReq
     getMedicationDescriptionFromCodeableConcept(request.medicationCodeableConcept ?? {}, request)
   );
 };
+
+// The Conditions a request was written for. Lets a care plan pull out the
+// medications prescribed against the condition it addresses.
+const getReasonConditionIds = (medicationRequest: MedicationRequest): string[] =>
+  (medicationRequest.reasonReference ?? []).flatMap((ref) =>
+    ref.reference?.startsWith("Condition/") ? [ref.reference.replace("Condition/", "")] : [],
+  );
 
 // Surface any detected issues (drug interactions, allergy alerts, duplicate
 // therapy, etc.) attached to the request. `detectedIssue` is an array of

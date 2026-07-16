@@ -26,6 +26,31 @@ export function ageFromBirthDate(iso: string | undefined): number | null {
   return age;
 }
 
+/**
+ * Coarse "how long ago" for a timestamp, e.g. "14 months ago".
+ *
+ * Deliberately vague at the long end — the point is to let a clinician judge
+ * whether something is stale, not to imply precision the data doesn't have.
+ * Returns null for missing, unparseable, or future timestamps.
+ */
+export function relativeFromNow(iso: string | undefined): string | null {
+  if (!iso) return null;
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return null;
+
+  const days = Math.floor((Date.now() - then.getTime()) / 86_400_000);
+  if (days < 0) return null;
+  if (days === 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 31) return `${days} days ago`;
+
+  const months = Math.round(days / 30.44);
+  if (months < 24) return `${months} month${months === 1 ? "" : "s"} ago`;
+
+  const years = Math.floor(days / 365.25);
+  return `${years} year${years === 1 ? "" : "s"} ago`;
+}
+
 /** Capitalize the first letter (for gender display, etc.). */
 export function titleCase(value: string): string {
   return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;

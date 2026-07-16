@@ -6,6 +6,8 @@ import { useState } from "react";
 import type { CarePlanListItem } from "@/lib/fhir/care-plan-types";
 import { formatDate } from "@/lib/utils/format";
 
+import { CarePlanStatusBadge } from "./CarePlanStatusBadge";
+
 /**
  * Care plans section for the patient detail page.
  *
@@ -13,23 +15,6 @@ import { formatDate } from "@/lib/utils/format";
  * behind a toggle — same active-first / discoverable-history pattern as the
  * Medications and Conditions sections. Each row links to the care plan detail.
  */
-
-const STATUS_STYLES: Record<string, string> = {
-  active: "bg-green-100 text-green-800",
-  "on-hold": "bg-amber-100 text-amber-800",
-  draft: "bg-blue-100 text-blue-700",
-  completed: "bg-slate-100 text-slate-600",
-  unknown: "bg-slate-100 text-slate-600",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const cls = STATUS_STYLES[status] ?? "bg-slate-100 text-slate-600";
-  return (
-    <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>
-      {status.replace(/-/g, " ")}
-    </span>
-  );
-}
 
 function CarePlanRow({ plan, active }: { plan: CarePlanListItem; active: boolean }) {
   const started = plan.startDate ? formatDate(plan.startDate.slice(0, 10)) : null;
@@ -56,7 +41,7 @@ function CarePlanRow({ plan, active }: { plan: CarePlanListItem; active: boolean
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <StatusBadge status={plan.status} />
+          <CarePlanStatusBadge status={plan.status} />
           <span aria-hidden className="text-muted transition group-hover:text-primary">
             ›
           </span>

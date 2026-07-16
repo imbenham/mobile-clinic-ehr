@@ -37,6 +37,18 @@ function toConditionView(resource: Condition): ConditionView {
   };
 }
 
+/** Resolve specific conditions by id — e.g. the ones a care plan addresses. */
+export async function getConditionsByIds(ids: string[]): Promise<ConditionView[]> {
+  if (ids.length === 0) return [];
+
+  const resources = await fhirClient.search<Condition>("Condition", {
+    _id: ids.join(","),
+    _count: ids.length,
+  });
+
+  return resources.map(toConditionView);
+}
+
 export async function getConditions(patientId: string): Promise<ConditionView[]> {
   const resources = await fhirClient.search<Condition>("Condition", {
     patient: patientId,

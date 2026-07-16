@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CarePlanList } from "@/components/patients/CarePlanList";
 import { ConditionList } from "@/components/patients/ConditionList";
 import { MedicationAllergies } from "@/components/patients/MedicationAllergies";
 import { MedicationList } from "@/components/patients/MedicationList";
@@ -12,6 +13,8 @@ import type { MedicationHistoryEntry } from "@/lib/fhir/medication-types";
 import { listMedications } from "@/lib/fhir/medications";
 import { getPatientView } from "@/lib/fhir/patients";
 import { ageFromBirthDate, formatDate, titleCase } from "@/lib/utils/format";
+import { listCarePlans } from "@/lib/fhir/care-plan";
+import { CarePlanListItem } from "@/lib/fhir/care-plan-types";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +47,14 @@ export default async function PatientDetailPage({
     conditions = await getConditions(id);
   } catch (err) {
     conditionsError = err instanceof FhirError ? err.message : "Could not load conditions.";
+  }
+
+  let carePlans: CarePlanListItem[] = [];
+  let carePlansError: string | null = null;
+  try {
+    carePlans = await listCarePlans(id);
+  } catch (err) {
+    carePlansError = err instanceof FhirError ? err.message : "Could not load care plans.";
   }
 
   const age = ageFromBirthDate(patient.birthDate);
@@ -99,6 +110,14 @@ export default async function PatientDetailPage({
         </div>
       ) : (
         <ConditionList conditions={conditions} />
+      )}
+
+      {carePlansError ? (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {carePlansError}
+        </div>
+      ) : (
+        <CarePlanList plans={carePlans} />
       )}
     </div>
   );

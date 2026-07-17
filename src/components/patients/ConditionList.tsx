@@ -91,7 +91,7 @@ function Subsection({
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted hover:text-foreground"
+        className="flex min-h-11 w-full items-center gap-1.5 rounded-md text-xs font-medium uppercase tracking-wide text-muted transition hover:text-foreground"
       >
         <span className="text-[10px] leading-none">{open ? "▾" : "▸"}</span>
         {label} ({count})

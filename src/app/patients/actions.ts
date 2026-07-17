@@ -4,12 +4,31 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { FhirError } from "@/lib/fhir/client";
-import { createPatient, updatePatient } from "@/lib/fhir/patients";
+import type { PatientView } from "@/lib/fhir/patient-types";
+import { createPatient, listPatients, updatePatient } from "@/lib/fhir/patients";
 import {
   flattenPatientErrors,
   patientSchema,
   type PatientFieldErrors,
 } from "@/lib/validation/patient";
+
+/**
+ * Name search for the patient rail.
+ *
+ * The rail lives in the shared patients layout, and Next.js layouts don't
+ * receive `searchParams` (they don't re-render on query-string changes), so the
+ * rail can't drive search through the URL the way the standalone list does.
+ * This action lets the client rail run the same server-side FHIR `name=` query
+ * on demand — keeping search on the server so it scales past a screenful of
+ * patients, rather than shipping the whole roster to the client to filter.
+ */
+export async function searchPatients(query: string): Promise<PatientView[]> {
+  try {
+    return await listPatients(query);
+  } catch {
+    return [];
+  }
+}
 
 /**
  * Result returned to the form via useActionState.

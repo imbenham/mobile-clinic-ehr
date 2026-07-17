@@ -45,9 +45,12 @@ export default async function CarePlanDetailPage({
   const backHref = plan.patientId ? `/patients/${plan.patientId}` : "/patients";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="@container flex flex-col gap-6">
       <div>
-        <Link href={backHref} className="text-sm text-muted hover:text-foreground">
+        <Link
+          href={backHref}
+          className="inline-flex min-h-11 items-center text-sm text-muted hover:text-foreground"
+        >
           ← Back to patient
         </Link>
       </div>
@@ -129,7 +132,7 @@ function ConditionChip({ condition }: { condition: ConditionView }) {
 function Monitoring({ facts }: { facts: MonitoringFact[] }) {
   return (
     <Section title="Latest measurements">
-      <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="grid gap-4 @sm:grid-cols-2 @3xl:grid-cols-4">
         {facts.map((fact) => {
           const since = relativeFromNow(fact.date);
           return (
@@ -198,15 +201,21 @@ function CareTeam({ members }: { members: CareTeamMember[] }) {
 
               {member.address && <p className="mt-0.5 text-xs text-muted">{member.address}</p>}
 
-              <div className="mt-2 flex flex-wrap gap-3 text-sm">
+              <div className="mt-2 flex flex-wrap gap-2 text-sm">
                 {member.phone && (
-                  <a href={`tel:${member.phone}`} className="text-primary hover:underline">
-                    {member.phone}
+                  <a
+                    href={`tel:${member.phone}`}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-3 font-medium text-primary transition hover:bg-primary/5"
+                  >
+                    <span aria-hidden>✆</span> {member.phone}
                   </a>
                 )}
                 {member.email && (
-                  <a href={`mailto:${member.email}`} className="text-primary hover:underline">
-                    {member.email}
+                  <a
+                    href={`mailto:${member.email}`}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-3 font-medium text-primary transition hover:bg-primary/5"
+                  >
+                    <span aria-hidden>✉</span> {member.email}
                   </a>
                 )}
                 {!member.phone && !member.email && (

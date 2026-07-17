@@ -155,7 +155,7 @@ export function MedicationList({ entries }: { entries: MedicationHistoryEntry[] 
           <button
             type="button"
             onClick={() => setShowHistory((v) => !v)}
-            className="shrink-0 text-xs font-medium text-primary hover:underline"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-md px-2.5 text-xs font-medium text-primary transition hover:bg-primary/5"
           >
             {showHistory ? "Hide history" : `Show full history (${history.length})`}
           </button>

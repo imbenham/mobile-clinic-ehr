@@ -1,106 +1,57 @@
-import Link from "next/link";
-
-import { PatientSearch } from "@/components/patients/PatientSearch";
+import { PatientRail } from "@/components/patients/PatientRail";
 import { FhirError } from "@/lib/fhir/client";
 import { listPatients, type PatientView } from "@/lib/fhir/patients";
-import { ageFromBirthDate, formatDate, titleCase } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 
-export default async function PatientsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
-}) {
-  const { q } = await searchParams;
-
+/**
+ * Patients index.
+ *
+ * Portrait: the full-width roster (the rail in list form), which navigates to a
+ * detail route on tap. Landscape: a placeholder in the detail pane — the roster
+ * already lives in the persistent rail from the layout, so this side just
+ * prompts a selection and hosts the "New patient" action.
+ */
+export default async function PatientsPage() {
   let patients: PatientView[] = [];
   let error: string | null = null;
   try {
-    patients = await listPatients(q);
+    patients = await listPatients();
   } catch (err) {
     error = err instanceof FhirError ? err.message : "Could not load patients.";
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Patients</h1>
-          <p className="text-sm text-muted">
-            {q ? `Results for “${q}”` : "All patients on the FHIR server"}
-          </p>
-        </div>
-        <Link
-          href="/patients/new"
-          className="inline-flex items-center gap-1.5 self-start rounded-md bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 sm:self-auto"
-        >
-          <span aria-hidden>＋</span> New patient
-        </Link>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Patients</h1>
+        <p className="text-sm text-muted">All patients on the FHIR server</p>
       </div>
-
-      <PatientSearch />
 
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
-      ) : patients.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border bg-surface px-4 py-12 text-center text-muted">
-          {q ? "No patients match your search." : "No patients found."}
-        </div>
       ) : (
-        <PatientTable patients={patients} />
-      )}
-    </div>
-  );
-}
+        <>
+          {/* Portrait: the roster itself. */}
+          <div className="lg:hidden">
+            <PatientRail initialPatients={patients} />
+          </div>
 
-function PatientTable({ patients }: { patients: PatientView[] }) {
-  return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-surface">
-      <table className="w-full text-left text-sm">
-        <thead className="border-b border-border text-xs uppercase tracking-wide text-muted">
-          <tr>
-            <th className="px-4 py-3 font-medium">Name</th>
-            <th className="px-4 py-3 font-medium">Gender</th>
-            <th className="px-4 py-3 font-medium">Date of birth</th>
-            <th className="px-4 py-3 font-medium">Age</th>
-            <th className="px-4 py-3" />
-          </tr>
-        </thead>
-        <tbody>
-          {patients.map((p) => {
-            const age = ageFromBirthDate(p.birthDate);
-            return (
-              <tr
-                key={p.id}
-                className="border-b border-border last:border-0 transition hover:bg-background"
-              >
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/patients/${p.id}`}
-                    className="font-medium text-primary hover:underline"
-                  >
-                    {p.fullName}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">{titleCase(p.gender)}</td>
-                <td className="px-4 py-3">{formatDate(p.birthDate)}</td>
-                <td className="px-4 py-3 text-muted">{age ?? "—"}</td>
-                <td className="px-4 py-3 text-right">
-                  <Link
-                    href={`/patients/${p.id}/edit`}
-                    className="text-xs font-medium text-muted hover:text-foreground"
-                  >
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+          {/* Landscape: the rail is in the layout, so prompt a selection here. */}
+          <div className="hidden min-h-[60vh] items-center justify-center rounded-lg border border-dashed border-border bg-surface text-center lg:flex">
+            <div className="text-muted">
+              <p className="text-3xl" aria-hidden>
+                ✚
+              </p>
+              <p className="mt-3 text-sm">
+                Select a patient from the list to view their record.
+              </p>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

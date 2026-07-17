@@ -178,7 +178,7 @@ export function CarePlanMedications({ medications }: { medications: MedicationHi
           <button
             type="button"
             onClick={() => setShowPast((v) => !v)}
-            className="shrink-0 text-xs font-medium text-primary hover:underline"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-md px-2.5 text-xs font-medium text-primary transition hover:bg-primary/5"
           >
             {showPast ? "Hide previous" : `Show previous (${past.length})`}
           </button>

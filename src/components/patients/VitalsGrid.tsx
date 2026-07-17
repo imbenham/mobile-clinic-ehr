@@ -43,7 +43,7 @@ export function VitalsGrid({ data }: { data: Record<string, VitalsEntry[]> }) {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-4 @lg:grid-cols-2 @5xl:grid-cols-3">
       {names.map((name) => (
         <VitalWidget key={name} name={name} entries={data[name]} />
       ))}

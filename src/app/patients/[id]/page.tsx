@@ -5,6 +5,7 @@ import { CarePlanList } from "@/components/patients/CarePlanList";
 import { ConditionList } from "@/components/patients/ConditionList";
 import { MedicationAllergies } from "@/components/patients/MedicationAllergies";
 import { MedicationList } from "@/components/patients/MedicationList";
+import { SectionNav } from "@/components/patients/SectionNav";
 import { VitalsSection } from "@/components/patients/VitalsHistoryComponent";
 import { FhirError } from "@/lib/fhir/client";
 import type { ConditionView } from "@/lib/fhir/condition-types";
@@ -59,16 +60,28 @@ export default async function PatientDetailPage({
 
   const age = ageFromBirthDate(patient.birthDate);
 
+  const sections = [
+    { id: "demographics", label: "Demographics" },
+    { id: "medications", label: "Medications" },
+    { id: "vitals", label: "Vitals" },
+    { id: "conditions", label: "Conditions" },
+    { id: "care-plans", label: "Care plans" },
+  ];
+
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <Link href="/patients" className="text-sm text-muted hover:text-foreground">
-          ← Back to patients
+    <div className="@container flex flex-col gap-6">
+      {/* The rail already offers a way back in landscape, so this is portrait-only. */}
+      <div className="lg:hidden">
+        <Link
+          href="/patients"
+          className="inline-flex min-h-11 items-center text-sm text-muted hover:text-foreground"
+        >
+          ← All patients
         </Link>
       </div>
 
       {/* Demographics header */}
-      <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-6 @xl:flex-row @xl:items-center @xl:justify-between">
         <div className="flex items-center gap-4">
           <div className="grid h-14 w-14 place-items-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
             {initials(patient.firstName, patient.lastName)}
@@ -83,15 +96,19 @@ export default async function PatientDetailPage({
         </div>
         <Link
           href={`/patients/${id}/edit`}
-          className="inline-flex items-center gap-1.5 self-start rounded-md border border-border px-3.5 py-2 text-sm font-medium transition hover:bg-background sm:self-auto"
+          className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-md border border-border px-4 py-2.5 text-sm font-medium transition hover:bg-background @xl:self-auto"
         >
           Edit patient
         </Link>
       </div>
 
-      <DemographicsGrid patient={patient} />
+      <SectionNav sections={sections} />
 
-      <div className="flex flex-col gap-3">
+      <section id="demographics" className="scroll-mt-20">
+        <DemographicsGrid patient={patient} />
+      </section>
+
+      <section id="medications" className="scroll-mt-20 flex flex-col gap-3">
         <MedicationAllergies patientId={id} />
         {medsError ? (
           <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -100,25 +117,31 @@ export default async function PatientDetailPage({
         ) : (
           <MedicationList entries={medications} />
         )}
-      </div>
+      </section>
 
-      <VitalsSection patientId={id} />
+      <section id="vitals" className="scroll-mt-20">
+        <VitalsSection patientId={id} />
+      </section>
 
-      {conditionsError ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {conditionsError}
-        </div>
-      ) : (
-        <ConditionList conditions={conditions} />
-      )}
+      <section id="conditions" className="scroll-mt-20">
+        {conditionsError ? (
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {conditionsError}
+          </div>
+        ) : (
+          <ConditionList conditions={conditions} />
+        )}
+      </section>
 
-      {carePlansError ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {carePlansError}
-        </div>
-      ) : (
-        <CarePlanList plans={carePlans} />
-      )}
+      <section id="care-plans" className="scroll-mt-20">
+        {carePlansError ? (
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {carePlansError}
+          </div>
+        ) : (
+          <CarePlanList plans={carePlans} />
+        )}
+      </section>
     </div>
   );
 }
@@ -140,7 +163,7 @@ function DemographicsGrid({
       <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">
         Demographics
       </h2>
-      <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <dl className="grid gap-4 @md:grid-cols-2 @3xl:grid-cols-3">
         {items.map((item) => (
           <div key={item.label}>
             <dt className="text-xs uppercase tracking-wide text-muted">{item.label}</dt>

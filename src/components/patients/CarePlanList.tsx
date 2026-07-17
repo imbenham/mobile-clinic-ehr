@@ -71,7 +71,7 @@ export function CarePlanList({ plans }: { plans: CarePlanListItem[] }) {
           <button
             type="button"
             onClick={() => setShowInactive((v) => !v)}
-            className="shrink-0 text-xs font-medium text-primary hover:underline"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-md px-2.5 text-xs font-medium text-primary transition hover:bg-primary/5"
           >
             {showInactive ? "Hide inactive" : `Show inactive (${inactive.length})`}
           </button>

@@ -118,13 +118,13 @@ export function PatientForm({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
+          className="inline-flex min-h-11 items-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
         >
           {pending ? "Saving…" : submitLabel}
         </button>
         <Link
           href={cancelHref}
-          className="rounded-md px-4 py-2 text-sm font-medium text-muted hover:text-foreground"
+          className="inline-flex min-h-11 items-center rounded-md px-4 py-2.5 text-sm font-medium text-muted transition hover:bg-background hover:text-foreground"
         >
           Cancel
         </Link>

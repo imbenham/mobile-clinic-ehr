@@ -73,13 +73,24 @@ export function toPatientResource(
  * List patients, optionally filtered by name.
  * FHIR's `name` search parameter matches given OR family name.
  */
+// Case- and accent-insensitive ordering for the roster.
+const nameCollator = new Intl.Collator("en", { sensitivity: "base" });
+
 export async function listPatients(query?: string): Promise<PatientView[]> {
   const patients = await fhirClient.search<Patient>("Patient", {
     _count: 50,
     _sort: "family",
     name: query?.trim() || undefined,
   });
-  return patients.map(toPatientView);
+  // Sort by last name, then first — the server's `_sort=family` doesn't break
+  // ties on the given name, and we want a stable alphabetical roster.
+  return patients
+    .map(toPatientView)
+    .sort(
+      (a, b) =>
+        nameCollator.compare(a.lastName, b.lastName) ||
+        nameCollator.compare(a.firstName, b.firstName),
+    );
 }
 
 export async function getPatient(id: string): Promise<Patient> {

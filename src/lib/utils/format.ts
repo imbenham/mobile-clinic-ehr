@@ -51,6 +51,18 @@ export function relativeFromNow(iso: string | undefined): string | null {
   return `${years} year${years === 1 ? "" : "s"} ago`;
 }
 
+/**
+ * "Last, First Middle" — the roster/list convention. `firstName` already holds
+ * the joined given names (first + middle). Degrades gracefully if either part
+ * is missing.
+ */
+export function formatLastNameFirst(firstName: string, lastName: string): string {
+  const last = lastName.trim();
+  const first = firstName.trim();
+  if (last && first) return `${last}, ${first}`;
+  return last || first || "Unknown";
+}
+
 /** Capitalize the first letter (for gender display, etc.). */
 export function titleCase(value: string): string {
   return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { searchPatients } from "@/app/patients/actions";
 import type { PatientView } from "@/lib/fhir/patient-types";
-import { ageFromBirthDate, formatDate, titleCase } from "@/lib/utils/format";
+import { ageFromBirthDate, formatDate, formatLastNameFirst, titleCase } from "@/lib/utils/format";
 
 /**
  * The patient list, as a navigable rail.
@@ -123,7 +123,7 @@ function PatientRailRow({
       >
         <div className="min-w-0">
           <p className={`truncate text-sm font-medium ${active ? "text-primary" : ""}`}>
-            {patient.fullName}
+            {formatLastNameFirst(patient.firstName, patient.lastName)}
           </p>
           <p className="truncate text-xs text-muted">
             {titleCase(patient.gender)} · {formatDate(patient.birthDate)}

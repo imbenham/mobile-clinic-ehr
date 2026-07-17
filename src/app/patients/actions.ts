@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { FhirError } from "@/lib/fhir/client";
-import type { PatientView } from "@/lib/fhir/patient-types";
+import { findDuplicateCandidates } from "@/lib/fhir/duplicates";
+import type { DuplicateMatch, PatientView } from "@/lib/fhir/patient-types";
 import { createPatient, listPatients, updatePatient } from "@/lib/fhir/patients";
 import {
   flattenPatientErrors,
@@ -36,9 +37,11 @@ export async function searchPatients(query: string): Promise<PatientView[]> {
  * form can re-render without losing the user's input.
  */
 export interface PatientFormState {
-  status: "idle" | "error";
+  status: "idle" | "error" | "needs_confirmation";
   fieldErrors?: PatientFieldErrors;
   formError?: string;
+  /** Possible existing records, set when status is "needs_confirmation". */
+  duplicates?: DuplicateMatch[];
   values?: {
     firstName: string;
     lastName: string;
@@ -56,6 +59,14 @@ function parseForm(formData: FormData) {
   };
 }
 
+/**
+ * True once the clinician has seen the duplicate warning and chosen to proceed
+ * anyway — the override button submits this. Skips the duplicate check.
+ */
+function isConfirmed(formData: FormData): boolean {
+  return formData.get("confirmDuplicate") === "yes";
+}
+
 export async function createPatientAction(
   _prev: PatientFormState,
   formData: FormData,
@@ -65,6 +76,13 @@ export async function createPatientAction(
 
   if (!parsed.success) {
     return { status: "error", fieldErrors: flattenPatientErrors(parsed.error), values: raw };
+  }
+
+  if (!isConfirmed(formData)) {
+    const duplicates = await findDuplicateCandidates(parsed.data);
+    if (duplicates.length > 0) {
+      return { status: "needs_confirmation", duplicates, values: raw };
+    }
   }
 
   try {
@@ -91,6 +109,21 @@ export async function updatePatientAction(
 
   if (!parsed.success) {
     return { status: "error", fieldErrors: flattenPatientErrors(parsed.error), values: raw };
+  }
+
+  // Only re-check for duplicates if the identifying fields actually changed —
+  // editing an unrelated field (e.g. gender) shouldn't trigger a roadblock over
+  // a coincidental same-DOB/surname patient.
+  const identityChanged =
+    raw.firstName !== formData.get("origFirstName") ||
+    raw.lastName !== formData.get("origLastName") ||
+    raw.birthDate !== formData.get("origBirthDate");
+
+  if (!isConfirmed(formData) && identityChanged) {
+    const duplicates = await findDuplicateCandidates(parsed.data, { excludeId: id });
+    if (duplicates.length > 0) {
+      return { status: "needs_confirmation", duplicates, values: raw };
+    }
   }
 
   try {

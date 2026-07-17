@@ -36,3 +36,13 @@ export interface PatientFormData {
   gender: Gender;
   birthDate: string;
 }
+
+/** A possible existing record surfaced by the duplicate-patient guard. */
+export interface DuplicateMatch {
+  id: string;
+  fullName: string;
+  gender: Gender;
+  birthDate: string;
+  /** Plain-language reason this was flagged, e.g. "Same date of birth and surname". */
+  reason: string;
+}

@@ -10,7 +10,7 @@ import {
   PointElement,
   Tooltip,
 } from "chart.js";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Line } from "react-chartjs-2";
 
 import { saveEncounterVitalsAction } from "@/app/patients/encounter-actions";
@@ -452,6 +452,22 @@ function VitalWidget({
   );
 }
 
+/** Reactively track dark mode so chart gridlines/ticks recolor on toggle. */
+function useIsDark(): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      window.addEventListener("mc-mode-change", onChange);
+      window.addEventListener("storage", onChange);
+      return () => {
+        window.removeEventListener("mc-mode-change", onChange);
+        window.removeEventListener("storage", onChange);
+      };
+    },
+    () => document.documentElement.getAttribute("data-mode") === "dark",
+    () => false,
+  );
+}
+
 function TrendChart({
   labels,
   datasets,
@@ -461,6 +477,10 @@ function TrendChart({
   datasets: TrendDataset[];
   showLegend: boolean;
 }) {
+  const isDark = useIsDark();
+  const gridColor = isDark ? "rgba(148,163,184,0.18)" : "#eef2f7";
+  const tickColor = isDark ? "#94a3b8" : "#64748b";
+
   const data = {
     labels,
     datasets: datasets.map((d) => ({
@@ -485,18 +505,18 @@ function TrendChart({
       legend: {
         display: showLegend,
         position: "bottom" as const,
-        labels: { boxWidth: 8, boxHeight: 8, font: { size: 10 }, padding: 8 },
+        labels: { boxWidth: 8, boxHeight: 8, font: { size: 10 }, padding: 8, color: tickColor },
       },
       tooltip: { boxPadding: 4 },
     },
     scales: {
       x: {
         grid: { display: false },
-        ticks: { font: { size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 4 },
+        ticks: { font: { size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 4, color: tickColor },
       },
       y: {
-        grid: { color: "#eef2f7" },
-        ticks: { font: { size: 9 }, maxTicksLimit: 4 },
+        grid: { color: gridColor },
+        ticks: { font: { size: 9 }, maxTicksLimit: 4, color: tickColor },
       },
     },
   };
@@ -511,13 +531,13 @@ type RangeStatus = "low" | "normal" | "high" | null;
 const STATUS_TEXT: Record<string, string> = {
   none: "text-foreground",
   normal: "text-foreground",
-  low: "text-amber-600",
-  high: "text-amber-600",
+  low: "text-amber-600 dark:text-amber-400",
+  high: "text-amber-600 dark:text-amber-400",
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  low: "bg-amber-100 text-amber-800",
-  high: "bg-amber-100 text-amber-800",
+  low: "bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-200",
+  high: "bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-200",
   normal: "",
 };
 

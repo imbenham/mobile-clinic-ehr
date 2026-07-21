@@ -104,12 +104,12 @@ function CadenceNote({ cadence }: { cadence: Cadence }) {
   }
 
   return (
-    <div className="mt-2 rounded-md border border-sky-200 bg-sky-50/70 px-2.5 py-2">
-      <p className="text-xs font-medium text-sky-900">
+    <div className="mt-2 rounded-md border border-sky-200 dark:border-sky-900/50 bg-sky-50/70 dark:bg-sky-950/40 px-2.5 py-2">
+      <p className="text-xs font-medium text-sky-900 dark:text-sky-200">
         No renewal recorded since {formatDate(isoDay(cadence.lastWritten))} —{" "}
         {relativeFromNow(new Date(cadence.lastWritten).toISOString())}.
       </p>
-      <p className="mt-0.5 text-xs text-sky-800">
+      <p className="mt-0.5 text-xs text-sky-800 dark:text-sky-300">
         {pattern}. On that pattern the next would have fallen around{" "}
         {formatDate(isoDay(cadence.expectedNext))}.
       </p>
@@ -136,7 +136,7 @@ function MedicationRow({
             {med.prescriberName && ` · ${med.prescriberName}`}
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+        <span className="shrink-0 rounded-full bg-slate-100 dark:bg-slate-800/70 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
           {med.status.replace(/-/g, " ")}
         </span>
       </div>

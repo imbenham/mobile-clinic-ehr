@@ -19,7 +19,7 @@ export async function MedicationAllergies({ patientId }: { patientId: string }) 
 
   if (error) {
     return (
-      <div className="rounded-md border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
+      <div className="rounded-md border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-4 py-2.5 text-sm text-red-700 dark:text-red-300">
         {error}
       </div>
     );
@@ -34,10 +34,10 @@ export async function MedicationAllergies({ patientId }: { patientId: string }) 
   }
 
   return (
-    <div className="rounded-lg border border-red-300 bg-red-50/70 p-4">
+    <div className="rounded-lg border border-red-300 dark:border-red-800/60 bg-red-50/70 dark:bg-red-950/40 p-4">
       <div className="mb-2.5 flex items-center gap-2">
         <span aria-hidden>⚠️</span>
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-red-800">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-red-800 dark:text-red-300">
           Medication allergies ({allergies.length})
         </h3>
       </div>
@@ -61,12 +61,12 @@ function AllergyRow({ allergy }: { allergy: AllergyView }) {
 
   return (
     <li className="flex flex-wrap items-baseline gap-x-2 gap-y-1 rounded-md bg-white/70 px-3 py-2 text-sm">
-      <span className="font-semibold text-red-900">{allergy.substance}</span>
+      <span className="font-semibold text-red-900 dark:text-red-200">{allergy.substance}</span>
 
       {criticalityLabel && (
         <span
           className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-            high ? "bg-red-200 text-red-900" : "bg-amber-100 text-amber-800"
+            high ? "bg-red-200 dark:bg-red-900/50 text-red-900 dark:text-red-200" : "bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-200"
           }`}
         >
           {criticalityLabel}
@@ -74,7 +74,7 @@ function AllergyRow({ allergy }: { allergy: AllergyView }) {
       )}
 
       {allergy.reactions.length > 0 && (
-        <span className="text-red-800">
+        <span className="text-red-800 dark:text-red-300">
           → {allergy.reactions.join(", ")}
           {allergy.severity && ` (${allergy.severity})`}
         </span>

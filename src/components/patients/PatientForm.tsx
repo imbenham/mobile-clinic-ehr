@@ -57,7 +57,7 @@ export function PatientForm({
 
       {state.formError && (
         <div
-          className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded-md border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-700 dark:text-red-300"
           role="alert"
         >
           {state.formError}
@@ -127,11 +127,11 @@ export function PatientForm({
       </div>
 
       {duplicates.length > 0 && (
-        <div className="rounded-md border border-amber-300 bg-amber-50 p-4" role="alert">
-          <p className="text-sm font-semibold text-amber-900">
+        <div className="rounded-md border border-amber-300 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-950/40 p-4" role="alert">
+          <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
             Possible existing {duplicates.length === 1 ? "record" : "records"}
           </p>
-          <p className="mt-1 text-sm text-amber-800">
+          <p className="mt-1 text-sm text-amber-800 dark:text-amber-200">
             This patient may already be in the system. Please check before creating a
             duplicate.
           </p>
@@ -139,7 +139,7 @@ export function PatientForm({
             {duplicates.map((match) => (
               <li
                 key={match.id}
-                className="flex items-center justify-between gap-3 rounded-md border border-amber-200 bg-surface px-3 py-2"
+                className="flex items-center justify-between gap-3 rounded-md border border-amber-200 dark:border-amber-800/50 bg-surface px-3 py-2"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium">{match.fullName}</p>

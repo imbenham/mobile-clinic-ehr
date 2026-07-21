@@ -50,18 +50,18 @@ function formatMedicationName(raw: string): MedicationNameParts {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  active: "bg-green-100 text-green-800",
-  completed: "bg-slate-100 text-slate-700",
-  stopped: "bg-slate-100 text-slate-700",
-  "on-hold": "bg-amber-100 text-amber-800",
-  cancelled: "bg-red-100 text-red-700",
-  "entered-in-error": "bg-red-100 text-red-700",
-  draft: "bg-blue-100 text-blue-700",
-  unknown: "bg-slate-100 text-slate-600",
+  active: "bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300",
+  completed: "bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-200",
+  stopped: "bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-200",
+  "on-hold": "bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-200",
+  cancelled: "bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300",
+  "entered-in-error": "bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300",
+  draft: "bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300",
+  unknown: "bg-slate-100 dark:bg-slate-800/70 text-slate-600 dark:text-slate-300",
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const cls = STATUS_STYLES[status] ?? "bg-slate-100 text-slate-600";
+  const cls = STATUS_STYLES[status] ?? "bg-slate-100 dark:bg-slate-800/70 text-slate-600 dark:text-slate-300";
   return (
     <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>
       {status.replace(/-/g, " ")}
@@ -78,7 +78,7 @@ function MedicationCard({ entry }: { entry: MedicationHistoryEntry }) {
   // Flagged meds always get the amber treatment so the flag UI is consistent
   // whether active or not. De-emphasis of a cancelled-but-flagged med comes
   // purely from its position (sorted to the bottom of the list).
-  const cardTone = flagged ? "border-amber-300 bg-amber-50/60" : "border-border bg-surface";
+  const cardTone = flagged ? "border-amber-300 dark:border-amber-800/60 bg-amber-50/60 dark:bg-amber-950/40" : "border-border bg-surface";
 
   return (
     <li className={`rounded-lg border p-4 ${cardTone}`}>
@@ -87,7 +87,7 @@ function MedicationCard({ entry }: { entry: MedicationHistoryEntry }) {
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <p className="font-medium">{name.primary}</p>
             {name.isPack && (
-              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+              <span className="rounded bg-slate-100 dark:bg-slate-800/70 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
                 Pack
               </span>
             )}
@@ -107,7 +107,7 @@ function MedicationCard({ entry }: { entry: MedicationHistoryEntry }) {
       </div>
 
       {flagged && (
-        <div className="mt-3 flex items-start gap-2 rounded-md bg-amber-100/70 px-3 py-2 text-sm text-amber-900">
+        <div className="mt-3 flex items-start gap-2 rounded-md bg-amber-100/70 dark:bg-amber-950/50 px-3 py-2 text-sm text-amber-900 dark:text-amber-100">
           <span aria-hidden>⚠️</span>
           <span>
             <span className="font-medium">Detected issue:</span> {entry.detectedIssue}
@@ -146,7 +146,7 @@ export function MedicationList({ entries }: { entries: MedicationHistoryEntry[] 
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
           Medications
           {flaggedCount > 0 && (
-            <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+            <span className="ml-2 rounded-full bg-amber-100 dark:bg-amber-950/50 px-2 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-200">
               {flaggedCount} flagged
             </span>
           )}

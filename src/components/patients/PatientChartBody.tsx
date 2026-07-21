@@ -3,6 +3,8 @@ import type { CarePlanListItem } from "@/lib/fhir/care-plan-types";
 import { FhirError } from "@/lib/fhir/client";
 import type { ConditionView } from "@/lib/fhir/condition-types";
 import { getConditions } from "@/lib/fhir/conditions";
+import type { ImmunizationRecord } from "@/lib/fhir/immunization-types";
+import { getImmunizations } from "@/lib/fhir/immunizations";
 import type { MedicationHistoryEntry } from "@/lib/fhir/medication-types";
 import { listMedications } from "@/lib/fhir/medications";
 import type { PatientView } from "@/lib/fhir/patient-types";
@@ -10,6 +12,7 @@ import { formatDate, titleCase } from "@/lib/utils/format";
 
 import { CarePlanList } from "./CarePlanList";
 import { ConditionList } from "./ConditionList";
+import { ImmunizationList } from "./ImmunizationList";
 import { MedicationAllergies } from "./MedicationAllergies";
 import { MedicationList } from "./MedicationList";
 import { SectionNav } from "./SectionNav";
@@ -27,9 +30,10 @@ import { VitalsSection } from "./VitalsHistoryComponent";
 const SECTIONS = [
   { id: "demographics", label: "Demographics" },
   { id: "medications", label: "Medications" },
-  { id: "vitals", label: "Vitals" },
   { id: "conditions", label: "Conditions" },
   { id: "care-plans", label: "Care plans" },
+  { id: "vitals", label: "Vitals" },
+  { id: "immunizations", label: "Immunizations" },
 ];
 
 export async function PatientChartBody({
@@ -58,6 +62,14 @@ export async function PatientChartBody({
     conditionsError = err instanceof FhirError ? err.message : "Could not load conditions.";
   }
 
+  let immunizations: ImmunizationRecord[] = [];
+  let immunizationsError: string | null = null;
+  try {
+    immunizations = await getImmunizations(id);
+  } catch (err) {
+    immunizationsError = err instanceof FhirError ? err.message : "Could not load immunizations.";
+  }
+
   let carePlans: CarePlanListItem[] = [];
   let carePlansError: string | null = null;
   try {
@@ -83,16 +95,24 @@ export async function PatientChartBody({
         )}
       </section>
 
-      <section id="vitals" className="scroll-mt-20">
-        <VitalsSection patientId={id} encounter={encounter} />
-      </section>
-
       <section id="conditions" className="scroll-mt-20">
         {conditionsError ? <ErrorBox message={conditionsError} /> : <ConditionList conditions={conditions} />}
       </section>
 
       <section id="care-plans" className="scroll-mt-20">
         {carePlansError ? <ErrorBox message={carePlansError} /> : <CarePlanList plans={carePlans} />}
+      </section>
+
+      <section id="vitals" className="scroll-mt-20">
+        <VitalsSection patientId={id} encounter={encounter} />
+      </section>
+
+      <section id="immunizations" className="scroll-mt-20">
+        {immunizationsError ? (
+          <ErrorBox message={immunizationsError} />
+        ) : (
+          <ImmunizationList immunizations={immunizations} />
+        )}
       </section>
     </>
   );
@@ -123,7 +143,7 @@ function DemographicsGrid({ patient }: { patient: PatientView }) {
 
 function ErrorBox({ message }: { message: string }) {
   return (
-    <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+    <div className="rounded-md border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm text-red-700 dark:text-red-300">
       {message}
     </div>
   );

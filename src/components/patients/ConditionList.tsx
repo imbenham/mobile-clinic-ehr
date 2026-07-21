@@ -20,17 +20,17 @@ import { formatDate } from "@/lib/utils/format";
  */
 
 const STATUS_STYLES: Record<string, string> = {
-  active: "bg-green-100 text-green-800",
-  recurrence: "bg-amber-100 text-amber-800",
-  relapse: "bg-amber-100 text-amber-800",
-  remission: "bg-slate-100 text-slate-600",
-  inactive: "bg-slate-100 text-slate-600",
-  resolved: "bg-slate-100 text-slate-600",
+  active: "bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300",
+  recurrence: "bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-200",
+  relapse: "bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-200",
+  remission: "bg-slate-100 dark:bg-slate-800/70 text-slate-600 dark:text-slate-300",
+  inactive: "bg-slate-100 dark:bg-slate-800/70 text-slate-600 dark:text-slate-300",
+  resolved: "bg-slate-100 dark:bg-slate-800/70 text-slate-600 dark:text-slate-300",
 };
 
 function StatusBadge({ status }: { status?: string }) {
   if (!status) return null;
-  const cls = STATUS_STYLES[status] ?? "bg-slate-100 text-slate-600";
+  const cls = STATUS_STYLES[status] ?? "bg-slate-100 dark:bg-slate-800/70 text-slate-600 dark:text-slate-300";
   return (
     <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>
       {status}

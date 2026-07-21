@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Drive Tailwind's `dark:` variant off our data-mode attribute (not the OS
+   preference), so semantic colors can opt into dark treatment. */
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
 /*
  * Clinical light theme, with three swappable palettes selected by a
  * `data-palette` attribute on <html> (see PaletteSwitcher). The accent and the

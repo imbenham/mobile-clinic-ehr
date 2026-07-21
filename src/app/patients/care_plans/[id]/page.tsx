@@ -168,7 +168,7 @@ function Activities({ activities }: { activities: CarePlanActivity[] }) {
               )}
             </div>
             {activity.status && (
-              <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              <span className="shrink-0 rounded-full bg-slate-100 dark:bg-slate-800/70 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
                 {activity.status.replace(/-/g, " ")}
               </span>
             )}

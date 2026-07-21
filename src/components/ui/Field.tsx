@@ -18,11 +18,11 @@ export function Field({
     <div className="flex flex-col gap-1.5">
       <label htmlFor={htmlFor} className="text-sm font-medium">
         {label}
-        {required && <span className="ml-0.5 text-red-600">*</span>}
+        {required && <span className="ml-0.5 text-red-600 dark:text-red-400">*</span>}
       </label>
       {children}
       {error && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
           {error}
         </p>
       )}

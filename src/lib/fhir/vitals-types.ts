@@ -40,6 +40,49 @@ export const VITAL_DISPLAY: Record<string, VitalDisplayConfig> = {
   'Pain Score':        { order: 9, unit: '/10',  precision: 0, color: '#e11d48', normal: [0, 3] },
 };
 
+/**
+ * Vitals that can be recorded during an encounter — the single-value ones, each
+ * a single `valueQuantity`. Blood pressure is intentionally excluded for now: it
+ * is a panel with systolic/diastolic components and needs a different shape.
+ * `ucum` is the UCUM unit code written to `valueQuantity.code`.
+ */
+export interface WritableVital {
+  key: string;
+  label: string;
+  loinc: string;
+  unit: string;
+  ucum: string;
+  step: string;
+  /** Computed, not typed — read-only in the UI (e.g. BMI from height & weight). */
+  derived?: boolean;
+}
+
+export const WRITABLE_VITALS: WritableVital[] = [
+  { key: "heartRate", label: "Heart rate", loinc: "8867-4", unit: "bpm", ucum: "/min", step: "1" },
+  { key: "respiratoryRate", label: "Respiratory rate", loinc: "9279-1", unit: "/min", ucum: "/min", step: "1" },
+  { key: "temperature", label: "Temperature", loinc: "8310-5", unit: "°C", ucum: "Cel", step: "0.1" },
+  { key: "oxygenSaturation", label: "O₂ saturation", loinc: "59408-5", unit: "%", ucum: "%", step: "1" },
+  { key: "painScore", label: "Pain score", loinc: "72514-3", unit: "/10", ucum: "{score}", step: "1" },
+  { key: "weight", label: "Weight", loinc: "29463-7", unit: "kg", ucum: "kg", step: "0.1" },
+  { key: "height", label: "Height", loinc: "8302-2", unit: "cm", ucum: "cm", step: "1" },
+  { key: "bmi", label: "BMI", loinc: "39156-5", unit: "kg/m²", ucum: "kg/m2", step: "0.1", derived: true },
+];
+
+/**
+ * Blood pressure is a panel Observation with systolic/diastolic components, not
+ * a single value — so it has its own config and dual inputs rather than living
+ * in WRITABLE_VITALS.
+ */
+export const BP_VITAL = {
+  name: "Blood Pressure",
+  loinc: "85354-9",
+  unit: "mmHg",
+  ucum: "mm[Hg]",
+  step: "1",
+  systolic: { key: "bpSystolic", loinc: "8480-6", display: "Systolic blood pressure" },
+  diastolic: { key: "bpDiastolic", loinc: "8462-4", display: "Diastolic blood pressure" },
+} as const;
+
 export interface VitalsComponent {
   codeSystem: string;
   code: string;

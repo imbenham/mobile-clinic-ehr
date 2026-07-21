@@ -1,18 +1,101 @@
 @import "tailwindcss";
 
 /*
- * Clinical light theme. An EHR is used in clinical settings where a bright,
- * high-contrast, consistent UI matters more than dark-mode preference, so we
- * commit to a single light palette.
+ * Clinical light theme, with three swappable palettes selected by a
+ * `data-palette` attribute on <html> (see PaletteSwitcher). The accent and the
+ * neutral grays recolor together so each reads as a distinct palette, not just a
+ * different button. Semantic colors (success/warning/error, chart lines) live in
+ * components and are intentionally left untouched.
  */
+
+/* Lavender & Onyx — the default. */
 :root {
-  --background: #f6f8fb;
+  --background: #f5f3fa;
   --surface: #ffffff;
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --primary: #0d6ea8;
+  --foreground: #1c1826;
+  --muted: #6c6580;
+  --border: #e6e1f0;
+  --primary: #6d54c7;
   --primary-foreground: #ffffff;
+}
+
+/* Teal & Slate. */
+:root[data-palette="teal"] {
+  --background: #eef4f4;
+  --surface: #ffffff;
+  --foreground: #16262b;
+  --muted: #5a6b72;
+  --border: #d8e3e4;
+  --primary: #0f766e;
+  --primary-foreground: #ffffff;
+}
+
+/* Emerald & Graphite. */
+:root[data-palette="emerald"] {
+  --background: #f3f5f3;
+  --surface: #ffffff;
+  --foreground: #1a211d;
+  --muted: #606b64;
+  --border: #dfe5e0;
+  --primary: #047857;
+  --primary-foreground: #ffffff;
+}
+
+/* Cardinal & Cream — deep red accent on warm cream neutrals. */
+:root[data-palette="cardinal"] {
+  --background: #f7f1e6;
+  --surface: #fffdf8;
+  --foreground: #2a211c;
+  --muted: #7a6d5f;
+  --border: #e8dfce;
+  --primary: #a4133c;
+  --primary-foreground: #fff8f2;
+}
+
+/*
+ * Dark mode — orthogonal to palette, via data-mode="dark" on <html>. The
+ * combined [data-mode][data-palette] selectors outrank the light palette rules,
+ * so any palette can go dark. Accents are lifted so they read on dark surfaces.
+ */
+:root[data-mode="dark"] {
+  /* Lavender & Onyx (dark) */
+  --background: #16141d;
+  --surface: #201d29;
+  --foreground: #ece9f4;
+  --muted: #9d95b0;
+  --border: #322c40;
+  --primary: #a78bfa;
+  --primary-foreground: #1a1622;
+}
+
+:root[data-mode="dark"][data-palette="teal"] {
+  --background: #0e1a1b;
+  --surface: #16252a;
+  --foreground: #e0ecec;
+  --muted: #8ba3a6;
+  --border: #24383b;
+  --primary: #2dd4bf;
+  --primary-foreground: #0b1b1a;
+}
+
+:root[data-mode="dark"][data-palette="emerald"] {
+  --background: #0f1712;
+  --surface: #16211a;
+  --foreground: #e2ece5;
+  --muted: #8ea89a;
+  --border: #23332a;
+  --primary: #34d399;
+  --primary-foreground: #0a140e;
+}
+
+:root[data-mode="dark"][data-palette="cardinal"] {
+  --background: #1b1411;
+  --surface: #251d18;
+  --foreground: #f1e8de;
+  --muted: #a89a8b;
+  --border: #37302a;
+  --primary: #ef4b6b;
+  --primary-foreground: #1b1411;
 }
 
 @theme inline {

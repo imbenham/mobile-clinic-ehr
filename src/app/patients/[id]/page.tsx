@@ -1,21 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { CarePlanList } from "@/components/patients/CarePlanList";
-import { ConditionList } from "@/components/patients/ConditionList";
-import { MedicationAllergies } from "@/components/patients/MedicationAllergies";
-import { MedicationList } from "@/components/patients/MedicationList";
-import { SectionNav } from "@/components/patients/SectionNav";
-import { VitalsSection } from "@/components/patients/VitalsHistoryComponent";
+import { PatientChartBody } from "@/components/patients/PatientChartBody";
+import { createEncounterAction } from "@/app/patients/encounter-actions";
 import { FhirError } from "@/lib/fhir/client";
-import type { ConditionView } from "@/lib/fhir/condition-types";
-import { getConditions } from "@/lib/fhir/conditions";
-import type { MedicationHistoryEntry } from "@/lib/fhir/medication-types";
-import { listMedications } from "@/lib/fhir/medications";
+import { countClinicEncounters } from "@/lib/fhir/encounters";
 import { getPatientView } from "@/lib/fhir/patients";
 import { ageFromBirthDate, formatDate, titleCase } from "@/lib/utils/format";
-import { listCarePlans } from "@/lib/fhir/care-plan";
-import { CarePlanListItem } from "@/lib/fhir/care-plan-types";
 
 export const dynamic = "force-dynamic";
 
@@ -34,39 +25,8 @@ export default async function PatientDetailPage({
     throw err;
   }
 
-  let medications: MedicationHistoryEntry[] = [];
-  let medsError: string | null = null;
-  try {
-    medications = await listMedications(id);
-  } catch (err) {
-    medsError = err instanceof FhirError ? err.message : "Could not load medications.";
-  }
-
-  let conditions: ConditionView[] = [];
-  let conditionsError: string | null = null;
-  try {
-    conditions = await getConditions(id);
-  } catch (err) {
-    conditionsError = err instanceof FhirError ? err.message : "Could not load conditions.";
-  }
-
-  let carePlans: CarePlanListItem[] = [];
-  let carePlansError: string | null = null;
-  try {
-    carePlans = await listCarePlans(id);
-  } catch (err) {
-    carePlansError = err instanceof FhirError ? err.message : "Could not load care plans.";
-  }
-
   const age = ageFromBirthDate(patient.birthDate);
-
-  const sections = [
-    { id: "demographics", label: "Demographics" },
-    { id: "medications", label: "Medications" },
-    { id: "vitals", label: "Vitals" },
-    { id: "conditions", label: "Conditions" },
-    { id: "care-plans", label: "Care plans" },
-  ];
+  const encounterCount = await countClinicEncounters(id).catch(() => 0);
 
   return (
     <div className="@container flex flex-col gap-6">
@@ -94,84 +54,33 @@ export default async function PatientDetailPage({
             </p>
           </div>
         </div>
-        <Link
-          href={`/patients/${id}/edit`}
-          className="inline-flex min-h-11 items-center gap-1.5 self-start rounded-md border border-border px-4 py-2.5 text-sm font-medium transition hover:bg-background @xl:self-auto"
-        >
-          Edit patient
-        </Link>
+
+        <div className="flex flex-wrap items-center gap-2 self-start @xl:self-auto">
+          <Link
+            href={`/patients/${id}/encounters`}
+            className="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-primary transition hover:bg-background"
+          >
+            Encounters ({encounterCount})
+          </Link>
+          <form action={createEncounterAction.bind(null, id)} className="contents">
+            <button
+              type="submit"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+            >
+              <span aria-hidden>＋</span> Create encounter
+            </button>
+          </form>
+          <Link
+            href={`/patients/${id}/edit`}
+            className="inline-flex min-h-11 items-center rounded-md border border-border px-4 py-2.5 text-sm font-medium transition hover:bg-background"
+          >
+            Edit patient
+          </Link>
+        </div>
       </div>
 
-      <SectionNav sections={sections} />
-
-      <section id="demographics" className="scroll-mt-20">
-        <DemographicsGrid patient={patient} />
-      </section>
-
-      <section id="medications" className="scroll-mt-20 flex flex-col gap-3">
-        <MedicationAllergies patientId={id} />
-        {medsError ? (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {medsError}
-          </div>
-        ) : (
-          <MedicationList entries={medications} />
-        )}
-      </section>
-
-      <section id="vitals" className="scroll-mt-20">
-        <VitalsSection patientId={id} />
-      </section>
-
-      <section id="conditions" className="scroll-mt-20">
-        {conditionsError ? (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {conditionsError}
-          </div>
-        ) : (
-          <ConditionList conditions={conditions} />
-        )}
-      </section>
-
-      <section id="care-plans" className="scroll-mt-20">
-        {carePlansError ? (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {carePlansError}
-          </div>
-        ) : (
-          <CarePlanList plans={carePlans} />
-        )}
-      </section>
+      <PatientChartBody patient={patient} />
     </div>
-  );
-}
-
-function DemographicsGrid({
-  patient,
-}: {
-  patient: Awaited<ReturnType<typeof getPatientView>>;
-}) {
-  const items = [
-    { label: "First name", value: patient.firstName || "—" },
-    { label: "Last name", value: patient.lastName || "—" },
-    { label: "Gender", value: titleCase(patient.gender) },
-    { label: "Date of birth", value: formatDate(patient.birthDate) },
-    { label: "Patient ID", value: patient.id },
-  ];
-  return (
-    <section className="rounded-lg border border-border bg-surface p-6">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">
-        Demographics
-      </h2>
-      <dl className="grid gap-4 @md:grid-cols-2 @3xl:grid-cols-3">
-        {items.map((item) => (
-          <div key={item.label}>
-            <dt className="text-xs uppercase tracking-wide text-muted">{item.label}</dt>
-            <dd className="mt-0.5 text-sm font-medium">{item.value}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
   );
 }
 

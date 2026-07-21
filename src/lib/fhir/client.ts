@@ -131,6 +131,20 @@ export const fhirClient = {
     return bundleResources(await request<Bundle<T>>({ path: resourceType, searchParams, ...opts }));
   },
 
+  /** Count matches without fetching them (uses `_summary=count`). */
+  async count(
+    resourceType: string,
+    searchParams?: RequestOptions["searchParams"],
+    opts?: Pick<RequestOptions, "next" | "cache">,
+  ): Promise<number> {
+    const bundle = await request<Bundle<FhirResource>>({
+      path: resourceType,
+      searchParams: { ...searchParams, _summary: "count" },
+      ...opts,
+    });
+    return bundle.total ?? 0;
+  },
+
   /** Create a new resource (POST). Returns the created resource with server id. */
   create<T extends FhirResource>(resourceType: string, resource: T): Promise<T> {
     return request<T>({ path: resourceType, method: "POST", body: resource });

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+
+import { ModeToggle } from "@/components/ModeToggle";
+import { PaletteSwitcher } from "@/components/PaletteSwitcher";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,6 +32,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* Apply the saved palette before first paint — no flash of the default. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var e=document.documentElement,p=localStorage.getItem('mc-palette'),m=localStorage.getItem('mc-mode');if(p)e.setAttribute('data-palette',p);if(m)e.setAttribute('data-mode',m);}catch(e){}`,
+          }}
+        />
         <header className="border-b border-border bg-surface">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
             <Link href="/patients" className="flex items-center gap-2 font-semibold">
@@ -37,22 +46,26 @@ export default function RootLayout({
               </span>
               <span className="text-lg tracking-tight">MC EHR</span>
             </Link>
-            <nav className="flex items-center gap-1.5 text-sm sm:gap-2">
-              <Link
-                href="/patients"
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 text-muted transition hover:bg-background hover:text-foreground"
-              >
-                <RosterIcon />
-                <span className="hidden sm:inline">Patients</span>
-              </Link>
-              <Link
-                href="/patients/new"
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-3 font-medium transition hover:bg-background"
-              >
-                <NewPatientIcon />
-                <span className="hidden sm:inline">New patient</span>
-              </Link>
-            </nav>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <ModeToggle />
+              <PaletteSwitcher />
+              <nav className="flex items-center gap-1.5 border-l border-border pl-2 text-sm sm:gap-2 sm:pl-3">
+                <Link
+                  href="/patients"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 text-muted transition hover:bg-background hover:text-foreground"
+                >
+                  <RosterIcon />
+                  <span className="hidden sm:inline">Patients</span>
+                </Link>
+                <Link
+                  href="/patients/new"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-3 font-medium transition hover:bg-background"
+                >
+                  <NewPatientIcon />
+                  <span className="hidden sm:inline">New patient</span>
+                </Link>
+              </nav>
+            </div>
           </div>
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">

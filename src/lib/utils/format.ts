@@ -26,6 +26,20 @@ export function ageFromBirthDate(iso: string | undefined): number | null {
   return age;
 }
 
+/** Format an ISO datetime as e.g. "18 Jul 2026, 14:30". Returns "—" if empty. */
+export function formatDateTime(iso: string | undefined): string {
+  if (!iso) return "—";
+  const parsed = new Date(iso);
+  if (Number.isNaN(parsed.getTime())) return iso;
+  return parsed.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 /**
  * Coarse "how long ago" for a timestamp, e.g. "14 months ago".
  *
